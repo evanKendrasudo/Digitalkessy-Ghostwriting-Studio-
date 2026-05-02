@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Kessy Ghostwriting Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #050005; color: #fff; font-family: 'Cormorant Garamond', serif; min-height: 100vh; }
+    .dk-title { font-family: 'Cormorant Garamond', serif; }
+    .dk-body { font-family: 'Montserrat', sans-serif; }
+
+    @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)} }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    @keyframes shimmer { 0%,100%{opacity:0.6}50%{opacity:1} }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0} }
+
+    .animate-in { animation: fadeUp 0.4s ease forwards; }
+
+    /* PARTICLES */
+    .particle { position: fixed; border-radius: 50%; pointer-events: none; }
+
+    /* NAV */
+    #nav { border-bottom: 1px solid #111; padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: #050005; z-index: 100; }
+    #nav-brand { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; font-style: italic; }
+    #steps-bar { display: flex; gap: 0.5rem; align-items: center; }
+    .step-dot { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #374151; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-family: Montserrat, sans-serif; font-weight: 600; color: #4B5563; flex-shrink: 0; }
+    .step-dot.active { border-color: var(--accent); color: var(--accent); }
+    .step-dot.done { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .step-line { width: 20px; height: 1px; background: #1F2937; }
+    .step-line.done { background: var(--accent); }
+
+    /* MAIN */
+    #main { max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
+
+    /* LANDING */
+    #landing { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; position: relative; overflow: hidden; }
+    #landing h1.big { font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 300; line-height: 1.1; }
+    #landing h1.big span { color: #C084FC; font-style: italic; font-weight: 600; display: block; }
+    .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, #C084FC, transparent); margin: 1.5rem auto; }
+    .tagline { font-family: Montserrat, sans-serif; color: #9CA3AF; font-size: 1rem; font-weight: 300; letter-spacing: 0.05em; line-height: 1.8; margin-bottom: 3rem; }
+    .eyebrow { font-family: Montserrat, sans-serif; font-size: 0.75rem; letter-spacing: 0.3em; color: #C084FC; margin-bottom: 1.5rem; }
+    .subline { font-family: Montserrat, sans-serif; color: #4B5563; font-size: 0.75rem; margin-top: 1rem; letter-spacing: 0.1em; }
+
+    /* BUTTONS */
+    .btn-main { background: linear-gradient(135deg, #7C3AED, #C084FC); color: #fff; border: none; padding: 1rem 3rem; border-radius: 2px; font-size: 0.85rem; letter-spacing: 0.2em; font-family: Montserrat, sans-serif; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-main:hover { opacity: 0.85; transform: translateY(-2px); }
+    .btn-accent { color: #fff; border: none; padding: 0.85rem 2.5rem; border-radius: 2px; font-family: Montserrat,sans-serif; font-size: 0.8rem; letter-spacing: 0.15em; font-weight: 600; cursor: pointer; transition: all 0.2s; background: var(--accent); }
+    .btn-accent:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-accent:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-accent.outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+    .btn-ghost { background: transparent; color: #6B7280; border: 1px solid #374151; padding: 0.7rem 1.5rem; border-radius: 2px; font-family: Montserrat,sans-serif; font-size: 0.75rem; letter-spacing: 0.1em; cursor: pointer; transition: all 0.2s; }
+    .btn-ghost:hover { color: #fff; border-color: #6B7280; }
+    .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.65rem; }
+    .btn-row { display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap; }
+
+    /* STEP HEADINGS */
+    .step-eyebrow { font-family: Montserrat, sans-serif; font-size: 0.7rem; letter-spacing: 0.3em; margin-bottom: 0.5rem; }
+    .step-title { font-size: 2.5rem; font-weight: 300; margin-bottom: 0.5rem; }
+    .step-sub { font-family: Montserrat, sans-serif; color: #6B7280; font-size: 0.85rem; margin-bottom: 2.5rem; }
+
+    /* GENRE CARDS */
+    #genre-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; }
+    .genre-card { border: 1px solid #1F2937; border-radius: 4px; padding: 2rem 1.5rem; text-align: center; background: #080808; cursor: pointer; transition: all 0.3s ease; }
+    .genre-card:hover { transform: translateY(-4px) scale(1.02); }
+    .genre-emoji { font-size: 2.5rem; margin-bottom: 1rem; }
+    .genre-name { font-size: 1.5rem; font-style: italic; margin-bottom: 0.5rem; }
+    .genre-tagline { font-family: Montserrat, sans-serif; color: #6B7280; font-size: 0.75rem; letter-spacing: 0.05em; }
+    .genre-tropes { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; margin-top: 1.5rem; }
+    .trope-tag { font-family: Montserrat, sans-serif; font-size: 0.6rem; padding: 0.2rem 0.5rem; border-radius: 2px; letter-spacing: 0.05em; }
+
+    /* CHAR GRID */
+    #char-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+    @media(max-width:600px){ #char-grid { grid-template-columns: 1fr; } #genre-grid { grid-template-columns: 1fr; } }
+    .char-card { border-radius: 4px; padding: 1.5rem; background: #080808; }
+    .char-label { font-family: Montserrat, sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; margin-bottom: 1rem; }
+    .name-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+    .name-chip { font-family: Montserrat, sans-serif; font-size: 0.65rem; color: #6B7280; border: 1px solid #1F2937; padding: 0.2rem 0.5rem; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
+    .name-chip:hover { color: #fff; border-color: #6B7280; }
+
+    /* INPUTS */
+    label.field-label { font-family: Montserrat, sans-serif; font-size: 0.75rem; color: #9CA3AF; display: block; margin-bottom: 0.5rem; letter-spacing: 0.1em; }
+    input.dk-input, select.dk-input { background: #0d0d0d; border: 1px solid #1F2937; color: #fff; padding: 0.75rem 1rem; border-radius: 2px; font-family: Montserrat, sans-serif; font-size: 0.85rem; width: 100%; outline: none; transition: border-color 0.2s; }
+    input.dk-input:focus, select.dk-input:focus { border-color: var(--accent); }
+    select.dk-input option { background: #0d0d0d; }
+    .field-group { display: flex; flex-direction: column; gap: 1.5rem; margin-bottom: 2rem; }
+
+    /* SETTING CHIPS */
+    .setting-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .setting-chip { font-family: Montserrat, sans-serif; font-size: 0.75rem; color: #6B7280; background: transparent; border: 1px solid #1F2937; padding: 0.4rem 0.9rem; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
+    .setting-chip.selected { color: #fff; }
+
+    /* OUTLINE */
+    .outline-list { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+    .outline-item { border: 1px solid #1F2937; border-radius: 4px; padding: 1rem 1.25rem; background: #080808; display: flex; align-items: flex-start; gap: 1rem; }
+    .ch-num { font-family: Montserrat, sans-serif; font-size: 0.7rem; font-weight: 600; min-width: 50px; padding-top: 2px; }
+    .ch-title { font-size: 1rem; font-style: italic; color: #E5E7EB; margin-bottom: 0.25rem; }
+    .ch-summary { font-family: Montserrat, sans-serif; font-size: 0.8rem; color: #6B7280; line-height: 1.6; }
+    .outline-meta { font-family: Montserrat, sans-serif; margin-bottom: 2rem; }
+
+    /* CHAPTER OUTPUT */
+    .chapter-box { border-radius: 4px; padding: 2.5rem; background: #080808; margin-bottom: 2rem; }
+    .chapter-text { line-height: 1.9; font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: #E5E7EB; white-space: pre-wrap; }
+
+    /* LOADING */
+    #loading-screen { text-align: center; padding: 4rem 0; }
+    .loading-title { font-size: 1.5rem; font-style: italic; margin-bottom: 1rem; }
+    .dots { display: flex; gap: 0.5rem; justify-content: center; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    .dot:nth-child(1){ animation: pulse 1.2s ease-in-out infinite 0s; }
+    .dot:nth-child(2){ animation: pulse 1.2s ease-in-out infinite 0.2s; }
+    .dot:nth-child(3){ animation: pulse 1.2s ease-in-out infinite 0.4s; }
+
+    /* ERROR */
+    .error-msg { font-family: Montserrat, sans-serif; color: #EF4444; font-size: 0.8rem; margin-bottom: 1rem; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- LANDING -->
+<div id="landing">
+  <p class="eyebrow dk-body">✦ DIGITAL KESSY PRESENTS ✦</p>
+  <h1 class="big dk-title">Ghostwriting<span>Studio</span></h1>
+  <div class="divider"></div>
+  <p class="tagline">Your AI-powered dark romance writing companion.<br>From idea to chapter — step by step.</p>
+  <button class="btn-main dk-body" onclick="startApp()">BEGIN YOUR STORY</button>
+  <p class="subline dk-body">Werewolf · Billionaire · Mafia</p>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+  <!-- NAV -->
+  <div id="nav">
+    <div id="nav-brand" class="dk-title">Digital Kessy</div>
+    <div id="steps-bar" class="dk-body"></div>
+  </div>
+
+  <div id="main">
+
+    <!-- STEP 1: GENRE -->
+    <div id="step-1" class="hidden">
+      <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 01</p>
+      <h2 class="step-title dk-title">Choose Your Genre</h2>
+      <p class="step-sub dk-body">Every dark romance starts with a world. Which one calls to you?</p>
+      <div id="genre-grid"></div>
+    </div>
+
+    <!-- STEP 2: CHARACTERS -->
+    <div id="step-2" class="hidden">
+      <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 02</p>
+      <h2 class="step-title dk-title">Build Your Characters</h2>
+      <p class="step-sub dk-body">Name them. Define them. They'll carry your story.</p>
+      <div id="char-grid">
+        <div class="char-card" id="male-card">
+          <p class="char-label dk-body" style="color:var(--accent)" id="male-lead-label"></p>
+          <label class="field-label">Name</label>
+          <input class="dk-input" id="male-name" placeholder="" />
+          <div class="name-chips" id="male-chips"></div>
+          <label class="field-label" style="margin-top:1rem">Role / Personality (optional)</label>
+          <input class="dk-input" id="male-role" placeholder="e.g. Cold, obsessive, ruthless" />
+        </div>
+        <div class="char-card" id="female-card">
+          <p class="char-label dk-body" style="color:var(--accent)" id="female-lead-label"></p>
+          <label class="field-label">Name</label>
+          <input class="dk-input" id="female-name" placeholder="" />
+          <div class="name-chips" id="female-chips"></div>
+          <label class="field-label" style="margin-top:1rem">Role / Personality (optional)</label>
+          <input class="dk-input" id="female-role" placeholder="e.g. Fierce, independent, broken" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-ghost dk-body" onclick="goStep(1)">← Back</button>
+        <button class="btn-accent dk-body" id="char-next-btn" onclick="goStep(3)" disabled>Continue →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: PLOT -->
+    <div id="step-3" class="hidden">
+      <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 03</p>
+      <h2 class="step-title dk-title">Shape the Story</h2>
+      <p class="step-sub dk-body">Pick your trope, conflict and setting — or type your own.</p>
+      <div class="field-group">
+        <div>
+          <label class="field-label">TROPE</label>
+          <select class="dk-input" id="plot-trope"><option value="">Choose a trope...</option></select>
+        </div>
+        <div>
+          <label class="field-label">CORE CONFLICT</label>
+          <select class="dk-input" id="plot-conflict-select"><option value="">Choose a conflict...</option></select>
+          <input class="dk-input" id="plot-conflict-custom" style="margin-top:0.5rem" placeholder="...or type your own conflict" />
+        </div>
+        <div>
+          <label class="field-label">SETTING</label>
+          <div class="setting-chips" id="setting-chips"></div>
+          <input class="dk-input" id="plot-setting" placeholder="Or type a custom setting..." />
+        </div>
+      </div>
+      <div id="plot-error" class="error-msg hidden"></div>
+      <div class="btn-row">
+        <button class="btn-ghost dk-body" onclick="goStep(2)">← Back</button>
+        <button class="btn-accent dk-body" id="outline-btn" onclick="generateOutline()">Generate Outline →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: OUTLINE -->
+    <div id="step-4" class="hidden">
+      <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 04</p>
+      <h2 class="step-title dk-title">Your Story Outline</h2>
+      <div class="outline-meta">
+        <p class="dk-body" style="color:#6B7280;font-size:0.85rem" id="outline-meta-1"></p>
+        <p class="dk-body" style="font-size:0.75rem;margin-top:0.2rem" id="outline-meta-2"></p>
+      </div>
+      <div class="outline-list" id="outline-list"></div>
+      <div class="btn-row">
+        <button class="btn-ghost dk-body" onclick="goStep(3)">← Edit Plot</button>
+        <button class="btn-accent dk-body" onclick="writeChapter(1)">Write Chapter 1 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: WRITE -->
+    <div id="step-5" class="hidden">
+      <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 05</p>
+      <h2 class="step-title dk-title">Your Chapter</h2>
+      <div id="loading-screen" class="hidden">
+        <p class="loading-title dk-title" style="color:var(--accent)">Writing your story...</p>
+        <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      </div>
+      <div id="write-error" class="error-msg hidden"></div>
+      <div id="chapter-output" class="hidden">
+        <div class="chapter-box" id="chapter-border">
+          <p class="chapter-text" id="chapter-text"></p>
+        </div>
+        <div class="btn-row">
+          <button class="btn-ghost dk-body" onclick="goStep(4)">← Back to Outline</button>
+          <button class="btn-accent dk-body" onclick="downloadChapter()">Download Chapter</button>
+          <button class="btn-accent outline dk-body" onclick="resetApp()">Start New Story</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const GENRES = [
+  {
+    id:"werewolf", emoji:"🐺", name:"Werewolf", tagline:"Alphas, mates & moonlit obsession",
+    color:"#8B5CF6", accent:"#C4B5FD",
+    tropes:["Alpha & Mate Bond","Pack Dynamics","Rejection & Reclaim","Moon Curse","Fated Mates"],
+    leads:{male:"The Alpha",female:"The Omega/Human"},
+    maleNames:["Kaden","Zane","Riven","Alaric","Theron"],
+    femaleNames:["Luna","Sera","Elara","Mira","Lyra"],
+    settings:["Pack Territory","Moonveil Forest","The Alpha's Manor","Hidden Wolf Town","The Sacred Grounds"],
+    conflicts:["Rejected mate seeks revenge","Alpha denies the bond","War between packs","Human discovers wolf world","Forbidden love across rival packs"],
+    openers:["The howl split the night in two —","She smelled of moonflowers and danger.","He had rejected her once. He would not survive rejecting her again.","The pack gathered, and she stood at the center of it all."],
+  },
+  {
+    id:"billionaire", emoji:"💰", name:"Billionaire", tagline:"Power, obsession & gilded cages",
+    color:"#D97706", accent:"#FCD34D",
+    tropes:["Boss & Employee","Arranged Marriage","Enemies to Lovers","Secret Baby","Fake Dating"],
+    leads:{male:"The Billionaire",female:"The Independent Woman"},
+    maleNames:["Damon","Xavier","Caelum","Adrian","Roman"],
+    femaleNames:["Marianne","Ariana","Sofia","Elena","Vivian"],
+    settings:["Manhattan Penthouse","Corporate HQ","Private Yacht","Milan Estate","The Hamptons"],
+    conflicts:["CEO obsessed with his new hire","Arranged marriage deal gone wrong","She knows his darkest secret","He'll destroy anyone who gets close to her","Billion-dollar bet with her heart as the prize"],
+    openers:["His name was on every magazine cover — and now it was on my contract.","The penthouse was cold. So was he.","She didn't know she'd just walked into a trap.","He never smiled. Until her."],
+  },
+  {
+    id:"mafia", emoji:"🥀", name:"Mafia", tagline:"Blood, loyalty & forbidden desire",
+    color:"#DC2626", accent:"#FCA5A5",
+    tropes:["Don & Captive","Arranged Marriage to the Don","Rival Families","Bodyguard Romance","Runaway Bride"],
+    leads:{male:"The Don",female:"The Captive/Rival's Daughter"},
+    maleNames:["Lucian","Matteo","Dante","Enzo","Raffael"],
+    femaleNames:["Charlie","Isabella","Valentina","Sienna","Aria"],
+    settings:["Rome Villa","Underground Club","Safe House","The Don's Estate","Sicily"],
+    conflicts:["She witnessed something she shouldn't have","He took her as collateral","Her father sold her to his enemy","She's trying to escape — he won't let her","Two families, one deadly alliance"],
+    openers:["They said the Don never took prisoners. They were wrong — he took me.","Rome smelled of roses and gunpowder.","She ran. He let her. He always let them run first.","The contract was signed in red. I didn't know it was blood."],
+  },
+];
+
+let state = { step: 0, genre: null, characters: {}, plot: {}, outline: null, chapter: "" };
+
+function setAccent(color) {
+  document.documentElement.style.setProperty('--accent', color);
+}
+
+function startApp() {
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  buildParticles('#C084FC');
+  setAccent('#8B5CF6');
+  buildGenreGrid();
+  goStep(1);
+}
+
+function buildParticles(color) {
+  const container = document.getElementById('particles');
+  container.innerHTML = '';
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 3 + 1;
+    p.style.cssText = `width:${size}px;height:${size}px;background:${color};opacity:${Math.random()*0.25+0.05};left:${Math.random()*100}%;top:${Math.random()*100}%;animation:float ${Math.random()*10+8}s ease-in-out infinite ${Math.random()*5}s;`;
+    container.appendChild(p);
+  }
+}
+
+function updateSteps() {
+  const steps = ['Genre','Chars','Plot','Outline','Write'];
+  const bar = document.getElementById('steps-bar');
+  bar.innerHTML = '';
+  steps.forEach((s, i) => {
+    const idx = i + 1;
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (idx < state.step ? ' done' : idx === state.step ? ' active' : '');
+    dot.textContent = idx < state.step ? '✓' : idx;
+    bar.appendChild(dot);
+    if (i < steps.length - 1) {
+      const line = document.createElement('div');
+      line.className = 'step-line' + (idx < state.step ? ' done' : '');
+      bar.appendChild(line);
+    }
+  });
+}
+
+function goStep(n) {
+  for (let i = 1; i <= 5; i++) document.getElementById('step-' + i).classList.add('hidden');
+  state.step = n;
+  const el = document.getElementById('step-' + n);
+  el.classList.remove('hidden');
+  el.classList.remove('animate-in');
+  void el.offsetWidth;
+  el.classList.add('animate-in');
+  updateSteps();
+  if (state.genre) {
+    const g = GENRES.find(x => x.id === state.genre);
+    setAccent(g.color);
+    document.getElementById('nav-brand').style.color = g.color;
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function buildGenreGrid() {
+  const grid = document.getElementById('genre-grid');
+  grid.innerHTML = '';
+  GENRES.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'genre-card';
+    card.style.setProperty('--hover-border', g.color);
+    card.onmouseenter = () => card.style.borderColor = g.color;
+    card.onmouseleave = () => card.style.borderColor = '#1F2937';
+    card.innerHTML = `
+      <div class="genre-emoji">${g.emoji}</div>
+      <div class="genre-name dk-title" style="color:${g.color}">${g.name}</div>
+      <div class="genre-tagline dk-body">${g.tagline}</div>
+      <div class="genre-tropes">
+        ${g.tropes.slice(0,3).map(t=>`<span class="trope-tag dk-body" style="color:${g.accent};border:1px solid ${g.color}44">${t}</span>`).join('')}
+      </div>`;
+    card.onclick = () => selectGenre(g.id);
+    grid.appendChild(card);
+  });
+}
+
+function selectGenre(id) {
+  state.genre = id;
+  const g = GENRES.find(x => x.id === id);
+  setAccent(g.color);
+  buildCharStep(g);
+  buildPlotStep(g);
+  goStep(2);
+}
+
+function buildCharStep(g) {
+  document.getElementById('male-lead-label').textContent = g.leads.male.toUpperCase();
+  document.getElementById('female-lead-label').textContent = g.leads.female.toUpperCase();
+  document.getElementById('male-card').style.border = `1px solid ${g.color}44`;
+  document.getElementById('female-card').style.border = `1px solid ${g.color}44`;
+  document.getElementById('male-name').placeholder = g.maleNames[0];
+  document.getElementById('female-name').placeholder = g.femaleNames[0];
+  document.getElementById('male-name').value = '';
+  document.getElementById('female-name').value = '';
+  document.getElementById('male-role').value = '';
+  document.getElementById('female-role').value = '';
+
+  const mChips = document.getElementById('male-chips');
+  mChips.innerHTML = '';
+  g.maleNames.forEach(n => {
+    const chip = document.createElement('span');
+    chip.className = 'name-chip dk-body';
+    chip.textContent = n;
+    chip.onclick = () => { document.getElementById('male-name').value = n; checkCharNext(); };
+    mChips.appendChild(chip);
+  });
+
+  const fChips = document.getElementById('female-chips');
+  fChips.innerHTML = '';
+  g.femaleNames.forEach(n => {
+    const chip = document.createElement('span');
+    chip.className = 'name-chip dk-body';
+    chip.textContent = n;
+    chip.onclick = () => { document.getElementById('female-name').value = n; checkCharNext(); };
+    fChips.appendChild(chip);
+  });
+
+  document.getElementById('male-name').oninput = checkCharNext;
+  document.getElementById('female-name').oninput = checkCharNext;
+}
+
+function checkCharNext() {
+  const btn = document.getElementById('char-next-btn');
+  btn.disabled = !document.getElementById('male-name').value || !document.getElementById('female-name').value;
+}
+
+function buildPlotStep(g) {
+  const tropeSelect = document.getElementById('plot-trope');
+  tropeSelect.innerHTML = '<option value="">Choose a trope...</option>';
+  g.tropes.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tropeSelect.appendChild(o); });
+
+  const conflictSelect = document.getElementById('plot-conflict-select');
+  conflictSelect.innerHTML = '<option value="">Choose a conflict...</option>';
+  g.conflicts.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; conflictSelect.appendChild(o); });
+  conflictSelect.onchange = () => { if (conflictSelect.value) document.getElementById('plot-conflict-custom').value = ''; };
+  document.getElementById('plot-conflict-custom').oninput = () => { if (document.getElementById('plot-conflict-custom').value) conflictSelect.value = ''; };
+
+  const chips = document.getElementById('setting-chips');
+  chips.innerHTML = '';
+  g.settings.forEach(s => {
+    const chip = document.createElement('span');
+    chip.className = 'setting-chip dk-body';
+    chip.textContent = s;
+    chip.onclick = () => {
+      document.querySelectorAll('.setting-chip').forEach(c => { c.classList.remove('selected'); c.style.borderColor = '#1F2937'; c.style.background = 'transparent'; c.style.color = '#6B7280'; });
+      chip.classList.add('selected');
+      chip.style.borderColor = g.color;
+      chip.style.background = g.color + '22';
+      chip.style.color = '#fff';
+      document.getElementById('plot-setting').value = s;
+    };
+    chips.appendChild(chip);
+  });
+  document.getElementById('plot-setting').value = '';
+  document.getElementById('plot-trope').value = '';
+  document.getElementById('plot-conflict-select').value = '';
+  document.getElementById('plot-conflict-custom').value = '';
+}
+
+async function generateOutline() {
+  const g = GENRES.find(x => x.id === state.genre);
+  const maleName = document.getElementById('male-name').value;
+  const femaleName = document.getElementById('female-name').value;
+  const trope = document.getElementById('plot-trope').value;
+  const conflict = document.getElementById('plot-conflict-custom').value || document.getElementById('plot-conflict-select').value;
+  const setting = document.getElementById('plot-setting').value;
+
+  const errEl = document.getElementById('plot-error');
+  if (!trope || !conflict || !setting) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.remove('hidden'); return; }
+  errEl.classList.add('hidden');
+
+  state.characters = { maleName, femaleName, maleRole: document.getElementById('male-role').value, femaleRole: document.getElementById('female-role').value };
+  state.plot = { trope, conflict, setting };
+
+  const btn = document.getElementById('outline-btn');
+  btn.disabled = true; btn.textContent = 'Generating Outline...';
+
+  try {
+    const prompt = `Generate a 10-chapter dark romance outline for a ${g.name} story.
+Hero: ${maleName} (${g.leads.male})
+Heroine: ${femaleName} (${g.leads.female})
+Setting: ${setting}
+Trope: ${trope}
+Core conflict: ${conflict}
+
+Return ONLY a JSON array of 10 objects like:
+[{"chapter":1,"title":"Chapter title","summary":"2-sentence chapter summary"}]
+No markdown, no explanation. Pure JSON only.`;
+
+    const system = `You are a dark romance story expert specializing in ${g.name} romance. You write fast-paced, emotionally intense outlines with strong hooks. Return ONLY valid JSON arrays, nothing else.`;
+    const result = await callClaude(prompt, system);
+    const clean = result.replace(/```json|```/g, '').trim();
+    state.outline = JSON.parse(clean);
+    buildOutline(g);
+    goStep(4);
+  } catch(e) {
+    errEl.textContent = 'Could not generate outline. Please try again.';
+    errEl.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = 'Generate Outline →';
+}
+
+function buildOutline(g) {
+  document.getElementById('outline-meta-1').textContent = `${state.characters.maleName} × ${state.characters.femaleName} · ${g.name} · ${state.plot.setting}`;
+  const m2 = document.getElementById('outline-meta-2');
+  m2.textContent = `${state.plot.trope} — ${state.plot.conflict}`;
+  m2.style.color = g.color;
+
+  const list = document.getElementById('outline-list');
+  list.innerHTML = '';
+  state.outline.forEach(ch => {
+    const item = document.createElement('div');
+    item.className = 'outline-item';
+    item.innerHTML = `
+      <div class="ch-num dk-body" style="color:${g.color}">CH ${ch.chapter}</div>
+      <div style="flex:1">
+        <p class="ch-title dk-title">${ch.title}</p>
+        <p class="ch-summary dk-body">${ch.summary}</p>
+      </div>
+      <button class="btn-accent btn-sm dk-body" onclick="writeChapter(${ch.chapter})">Write →</button>`;
+    item.querySelector('button').style.background = g.color;
+    list.appendChild(item);
+  });
+}
+
+async function writeChapter(num) {
+  goStep(5);
+  const g = GENRES.find(x => x.id === state.genre);
+  const ch = state.outline[num - 1];
+  const opener = g.openers[Math.floor(Math.random() * g.openers.length)];
+
+  document.getElementById('loading-screen').classList.remove('hidden');
+  document.getElementById('chapter-output').classList.add('hidden');
+  document.getElementById('write-error').classList.add('hidden');
+
+  try {
+    const prompt = `Write Chapter ${num} of this dark romance story.
+
+Title: ${ch.title}
+Summary: ${ch.summary}
+Hero: ${state.characters.maleName}
+Heroine: ${state.characters.femaleName}
+Setting: ${state.plot.setting}
+Suggested opener style: "${opener}"
+
+Write 800-1000 words. Fast-paced, short paragraphs, 70% dialogue. End with a hook that makes the reader desperate for the next chapter. Show don't tell. Make it INTENSE.`;
+
+    const system = `You are a dark romance author specializing in ${g.name} fiction. Your style: cinematic, emotionally raw, fast-paced with short punchy paragraphs. Heavy dialogue. Forbidden tension. Every scene pushes the story forward.`;
+    const result = await callClaude(prompt, system);
+    state.chapter = result;
+    document.getElementById('chapter-text').textContent = result;
+    document.getElementById('chapter-border').style.border = `1px solid ${g.color}33`;
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('chapter-output').classList.remove('hidden');
+    document.getElementById('chapter-output').scrollIntoView({ behavior: 'smooth' });
+  } catch(e) {
+    document.getElementById('loading-screen').classList.add('hidden');
+    const err = document.getElementById('write-error');
+    err.textContent = 'Could not generate chapter. Please try again.';
+    err.classList.remove('hidden');
+  }
+}
+
+function downloadChapter() {
+  const blob = new Blob([state.chapter], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${state.characters.maleName}-${state.characters.femaleName}-chapter.txt`;
+  a.click();
+}
+
+function resetApp() {
+  state = { step: 0, genre: null, characters: {}, plot: {}, outline: null, chapter: "" };
+  setAccent('#8B5CF6');
+  goStep(1);
+}
+
+async function callClaude(prompt, system) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+    body: JSON.stringify({
+      model: 'llama3-70b-8192',
+      max_tokens: 1000,
+      messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  return data.choices[0].message.content;
+}
+
+// Landing particles
+(function(){
+  const c = document.getElementById('particles');
+  for(let i=0;i<15;i++){
+    const p=document.createElement('div');
+    p.className='particle';
+    const sz=Math.random()*3+1;
+    p.style.cssText=`width:${sz}px;height:${sz}px;background:#C084FC;opacity:${Math.random()*0.2+0.05};left:${Math.random()*100}%;top:${Math.random()*100}%;animation:float ${Math.random()*10+8}s ease-in-out infinite ${Math.random()*5}s;`;
+    c.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>
