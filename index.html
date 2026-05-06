@@ -163,7 +163,7 @@
           <label class="field-label">Name</label>
           <input class="dk-input" id="male-name" placeholder="" />
           <div class="name-chips" id="male-chips"></div>
-          <label class="field-label" style="margin-top:1rem">Role / Personality (optional)</label>
+          <label class="field-label" style="margin-top:1rem">Role / Personality <span style="color:#4B5563">(optional — AI will craft if blank)</span></label>
           <input class="dk-input" id="male-role" placeholder="e.g. Cold, obsessive, ruthless" />
         </div>
         <div class="char-card" id="female-card">
@@ -171,7 +171,7 @@
           <label class="field-label">Name</label>
           <input class="dk-input" id="female-name" placeholder="" />
           <div class="name-chips" id="female-chips"></div>
-          <label class="field-label" style="margin-top:1rem">Role / Personality (optional)</label>
+          <label class="field-label" style="margin-top:1rem">Role / Personality <span style="color:#4B5563">(optional — AI will craft if blank)</span></label>
           <input class="dk-input" id="female-role" placeholder="e.g. Fierce, independent, broken" />
         </div>
       </div>
@@ -185,19 +185,19 @@
     <div id="step-3" class="hidden">
       <p class="step-eyebrow dk-body" style="color:var(--accent)">STEP 03</p>
       <h2 class="step-title dk-title">Shape the Story</h2>
-      <p class="step-sub dk-body">Pick your trope, conflict and setting — or type your own.</p>
+      <p class="step-sub dk-body">Pick your trope, conflict and setting — or leave any blank and let the AI decide.</p>
       <div class="field-group">
         <div>
-          <label class="field-label">TROPE</label>
-          <select class="dk-input" id="plot-trope"><option value="">Choose a trope...</option></select>
+          <label class="field-label">TROPE <span style="color:#4B5563">(optional)</span></label>
+          <select class="dk-input" id="plot-trope"><option value="">AI will choose the best trope...</option></select>
         </div>
         <div>
-          <label class="field-label">CORE CONFLICT</label>
-          <select class="dk-input" id="plot-conflict-select"><option value="">Choose a conflict...</option></select>
+          <label class="field-label">CORE CONFLICT <span style="color:#4B5563">(optional)</span></label>
+          <select class="dk-input" id="plot-conflict-select"><option value="">AI will craft the conflict...</option></select>
           <input class="dk-input" id="plot-conflict-custom" style="margin-top:0.5rem" placeholder="...or type your own conflict" />
         </div>
         <div>
-          <label class="field-label">SETTING</label>
+          <label class="field-label">SETTING <span style="color:#4B5563">(optional)</span></label>
           <div class="setting-chips" id="setting-chips"></div>
           <input class="dk-input" id="plot-setting" placeholder="Or type a custom setting..." />
         </div>
@@ -420,11 +420,11 @@ function checkCharNext() {
 
 function buildPlotStep(g) {
   const tropeSelect = document.getElementById('plot-trope');
-  tropeSelect.innerHTML = '<option value="">Choose a trope...</option>';
+  tropeSelect.innerHTML = '<option value="">AI will choose the best trope...</option>';
   g.tropes.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; tropeSelect.appendChild(o); });
 
   const conflictSelect = document.getElementById('plot-conflict-select');
-  conflictSelect.innerHTML = '<option value="">Choose a conflict...</option>';
+  conflictSelect.innerHTML = '<option value="">AI will craft the conflict...</option>';
   g.conflicts.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; conflictSelect.appendChild(o); });
   conflictSelect.onchange = () => { if (conflictSelect.value) document.getElementById('plot-conflict-custom').value = ''; };
   document.getElementById('plot-conflict-custom').oninput = () => { if (document.getElementById('plot-conflict-custom').value) conflictSelect.value = ''; };
@@ -455,33 +455,39 @@ async function generateOutline() {
   const g = GENRES.find(x => x.id === state.genre);
   const maleName = document.getElementById('male-name').value;
   const femaleName = document.getElementById('female-name').value;
+  const maleRole = document.getElementById('male-role').value;
+  const femaleRole = document.getElementById('female-role').value;
   const trope = document.getElementById('plot-trope').value;
   const conflict = document.getElementById('plot-conflict-custom').value || document.getElementById('plot-conflict-select').value;
   const setting = document.getElementById('plot-setting').value;
 
   const errEl = document.getElementById('plot-error');
-  if (!trope || !conflict || !setting) { errEl.textContent = 'Please fill in all fields.'; errEl.classList.remove('hidden'); return; }
   errEl.classList.add('hidden');
 
-  state.characters = { maleName, femaleName, maleRole: document.getElementById('male-role').value, femaleRole: document.getElementById('female-role').value };
+  state.characters = { maleName, femaleName, maleRole, femaleRole };
   state.plot = { trope, conflict, setting };
 
   const btn = document.getElementById('outline-btn');
   btn.disabled = true; btn.textContent = 'Generating Outline...';
 
   try {
+    // Build prompt — tell AI to invent any optional fields left blank
     const prompt = `Generate a 10-chapter dark romance outline for a ${g.name} story.
-Hero: ${maleName} (${g.leads.male})
-Heroine: ${femaleName} (${g.leads.female})
-Setting: ${setting}
-Trope: ${trope}
-Core conflict: ${conflict}
+
+Hero: ${maleName} (${g.leads.male})${maleRole ? ` — personality: ${maleRole}` : ' — invent a compelling dark personality for him'}
+Heroine: ${femaleName} (${g.leads.female})${femaleRole ? ` — personality: ${femaleRole}` : ' — invent a compelling personality for her'}
+Setting: ${setting || `choose the most dramatic setting for a ${g.name} dark romance`}
+Trope: ${trope || `choose the most compelling trope for this ${g.name} story`}
+Core conflict: ${conflict || `invent a high-stakes, emotionally charged conflict for this ${g.name} story`}
+
+For any field marked "choose" or "invent", make a bold creative decision that best fits the genre and characters.
 
 Return ONLY a JSON array of 10 objects like:
 [{"chapter":1,"title":"Chapter title","summary":"2-sentence chapter summary"}]
 No markdown, no explanation. Pure JSON only.`;
 
-    const system = `You are a dark romance story expert specializing in ${g.name} romance. You write fast-paced, emotionally intense outlines with strong hooks. Return ONLY valid JSON arrays, nothing else.`;
+    const system = `You are a dark romance story expert specializing in ${g.name} romance. You write fast-paced, emotionally intense outlines with strong hooks. When story details are not provided, you invent compelling ones that fit the genre perfectly. Return ONLY valid JSON arrays, nothing else.`;
+
     const result = await callClaude(prompt, system);
     const clean = result.replace(/```json|```/g, '').trim();
     state.outline = JSON.parse(clean);
@@ -490,14 +496,17 @@ No markdown, no explanation. Pure JSON only.`;
   } catch(e) {
     errEl.textContent = 'Could not generate outline. Please try again.';
     errEl.classList.remove('hidden');
+    console.error(e);
   }
   btn.disabled = false; btn.textContent = 'Generate Outline →';
 }
 
 function buildOutline(g) {
-  document.getElementById('outline-meta-1').textContent = `${state.characters.maleName} × ${state.characters.femaleName} · ${g.name} · ${state.plot.setting}`;
+  const maleRole = state.characters.maleRole || 'AI-crafted personality';
+  const femaleRole = state.characters.femaleRole || 'AI-crafted personality';
+  document.getElementById('outline-meta-1').textContent = `${state.characters.maleName} × ${state.characters.femaleName} · ${g.name} · ${state.plot.setting || 'AI-chosen setting'}`;
   const m2 = document.getElementById('outline-meta-2');
-  m2.textContent = `${state.plot.trope} — ${state.plot.conflict}`;
+  m2.textContent = `${state.plot.trope || 'AI-chosen trope'} — ${state.plot.conflict || 'AI-crafted conflict'}`;
   m2.style.color = g.color;
 
   const list = document.getElementById('outline-list');
@@ -528,13 +537,16 @@ async function writeChapter(num) {
   document.getElementById('write-error').classList.add('hidden');
 
   try {
+    const maleRole = state.characters.maleRole || 'dark, obsessive, commanding';
+    const femaleRole = state.characters.femaleRole || 'fierce, guarded, resilient';
+
     const prompt = `Write Chapter ${num} of this dark romance story.
 
 Title: ${ch.title}
 Summary: ${ch.summary}
-Hero: ${state.characters.maleName}
-Heroine: ${state.characters.femaleName}
-Setting: ${state.plot.setting}
+Hero: ${state.characters.maleName} — personality: ${maleRole}
+Heroine: ${state.characters.femaleName} — personality: ${femaleRole}
+Setting: ${state.plot.setting || 'a dramatically appropriate location'}
 Suggested opener style: "${opener}"
 
 Write 800-1000 words. Fast-paced, short paragraphs, 70% dialogue. End with a hook that makes the reader desperate for the next chapter. Show don't tell. Make it INTENSE.`;
@@ -569,14 +581,18 @@ function resetApp() {
   goStep(1);
 }
 
+// ── AI ENGINE: via Cloudflare Worker ──
 async function callClaude(prompt, system) {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch('https://wild-block-4070.iheanachochimezurum.workers.dev/', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer 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' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'llama3-70b-8192',
       max_tokens: 1000,
-      messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }]
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: prompt }
+      ]
     })
   });
   const data = await res.json();
@@ -597,4 +613,4 @@ async function callClaude(prompt, system) {
 })();
 </script>
 </body>
-</html>
+            </html>
